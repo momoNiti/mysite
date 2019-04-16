@@ -22,7 +22,9 @@
                 <ol>
                     {% for poll in poll_list %}
                         <li>{{poll.title}} (จำนวนคำถาม {{poll.question_count}} คำถาม)-
-                            <a href="{% url 'poll_detail' poll.id %}">Detail</a>
+                            {% if user.is_authenticated %}
+                                <a href="{% url 'poll_detail' poll.id %}">Detail</a>
+                            {% endif %}
                         </li>
                     {% endfor %}
                 </ol>
@@ -31,9 +33,18 @@
                 <img class="img-thumbnail rounded mx-auto d-block" src="{% static 'polls/images/goldie.jpg' %}" alt="">
             </div>
         </div>
+        {% if user.is_authenticated %}
+        <p>
+            <a href="{% url 'logout' %}">LOGOUT</a>
+        </p>
+    {% endif %}
 
+    {% if perms.polls.add_poll %}
+        <p>
+            <a href="{% url 'create_poll' %}">Create new Poll</a>
+        </p>
+    {% endif %}
     </div>
-
 
     <script src="{% static 'js/bootstrap.min.js' %}"></script>
 </body>
