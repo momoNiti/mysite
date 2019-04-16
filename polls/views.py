@@ -5,6 +5,7 @@ from django.shortcuts import render
 
 # Create your views here.
 from polls.models import Poll, Question, Answer
+from polls.forms import PollForm
 def index(request):
     # poll_list = Poll.objects.filter(del_flag=False, id__gt=2)
     poll_list = Poll.objects.all()
@@ -22,15 +23,47 @@ def index(request):
 
 def detail(request, poll_id):
     poll = Poll.objects.get(pk=poll_id)
-    ans = {}
-    if request.method == "GET":
-        answer = request.GET
-        for key, value in answer.items():
-            temp = value.split('_')
-            ans[temp[0]] = temp[1]
-        # print(ans)
-        for question, choice in ans.items():
-            ans_model = Answer(choice_id=choice, question_id=question)
-            ans_model.save()
+    # print(request.GET)
+    if request.method == 'POST':
+        for question in poll.question_set.all():
+            name = 'choice' + str(question.id)
+            choice_id = request.POST.get(name)
+            if choice_id:
+                try:
+                    ans = Answer.objects.get(question_id=question.id)
+                    ans.choice_id = choice_id
+                    ans.save()
+                except Answer.DoesNotExist:
+                    Answer.objects.create(
+                        choice_id = choice_id,
+                        question_id = question.id
+                    )
+        # print(choice_id)
     return render(request, 'polls/detail.html', {'poll' : poll})
 
+def create(request):
+    if request.method == "POST":
+        form = PollForm(request.POST)
+        if form.is_valid():
+            poll = Poll.objects.create(
+                title = form.cleaned_data.get('title'),
+                start_date = form.cleaned_data.get('start_date'),
+                end_date = form.cleaned_data.get('end_date'),
+            )
+            for i in range(1, form.cleaned_data.get('no_questions')+1):
+                Question.objects.create(
+                    text = 'QQQ'+str(i),
+                    type = '01',
+                    poll = poll
+                )
+
+        # title = request.POST.get('title')
+        # question_list = request.POST.getlist('questions[]')
+        pass
+
+    else:
+        # answer = request.GET.get('answer')
+        # answer_list = request.GET.getlist('answer[]')
+        form = PollForm()
+    context = {'form': form}
+    return render(request, 'polls/create.html', context=context)

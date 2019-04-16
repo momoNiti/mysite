@@ -9,8 +9,8 @@
 </head>
 
 <body>
-    <form action="{% url 'poll_detail' poll.id %}" method="GET">
-        
+    <form action="{% url 'poll_detail' poll.id %}" method="POST">
+        {% csrf_token %}
         <div class="container">
 
             <h1>Poll: {{poll.title}} </h1>
@@ -22,10 +22,13 @@
                     {% for choice in question.choice_set.all %}
 
                     <div class="form-check">
-                        <input class="form-check-input" type="radio" name="{{question.id}}" id="{{choice.id}}"
-                            value="{{choice.question_id}}_{{choice.value}}">
+                        <input class="form-check-input" type="radio" name="choice{{question.id}}" id="{{choice.id}}"
+                            value="{{choice.id}}"
+                            {% if choice.answer %}
+                                checked="checked"
+                            {% endif %}>
                         <label class="form-check-label" for="{{choice.id}}">
-                            {{choice.text}} {{choice.question_id}}_{{choice.value}}
+                            {{choice.text}}
                         </label>
                     </div>
 
