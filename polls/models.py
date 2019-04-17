@@ -1,6 +1,12 @@
 from django.db import models
 
 # Create your models here.
+class Comment(models.Model):
+    title = models.CharField(max_length=100)
+    body = models.TextField()
+    email = models.EmailField()
+    tel = models.CharField(max_length=10)
+
 class Poll(models.Model):
     title = models.CharField(max_length=100)
     start_date = models.DateField(null=True, blank=True)

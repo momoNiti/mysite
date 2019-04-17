@@ -3,11 +3,11 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required, permission_required
-from django.db.models import Count
+# from django.db.models import Count
 
 # Create your views here.
-from polls.models import Poll, Question, Answer
-from polls.forms import PollForm
+from polls.models import Poll, Question, Answer, Comment
+from polls.forms import PollForm, CommentForm
 
 def index(request):
     print(request.user)
@@ -65,17 +65,26 @@ def create(request):
                     type = '01',
                     poll = poll
                 )
-
-        # title = request.POST.get('title')
-        # question_list = request.POST.getlist('questions[]')
-        pass
-
     else:
-        # answer = request.GET.get('answer')
-        # answer_list = request.GET.getlist('answer[]')
         form = PollForm()
     context = {'form': form}
     return render(request, 'polls/create.html', context=context)
+
+def comment(request):
+    if (request.method == "POST"):
+        form = CommentForm(request.POST)
+        if form.is_valid():
+            comment = Comment.objects.create(
+                title = form.cleaned_data.get('title'),
+                body = form.cleaned_data.get('body'),
+                email = form.cleaned_data.get('email'),
+                tel = form.cleaned_data.get('tel')
+            )
+            comment.save()
+    else:
+        form = CommentForm()
+    context = {'form': form}
+    return render(request, template_name="polls/comment.html", context=context)
 
 def my_login(request):
     context = {}

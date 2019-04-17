@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>create-comment</title>
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+    <style>
+        .errorlist{
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <form action="{% url 'create-comment' %}" method="POST">
+        {% csrf_token %}
+        <h1>New Comment</h1>
+        {% if form.non_field_errors %}
+            <p>
+                {{form.non_field_errors}}
+            </p>
+        {% endif %}
+        <p>
+            <label id="{{form.title.id_for_label}}">{{form.title.label}}</label><br>
+            {{form.title.errors}}{{form.title}}
+        </p>
+        <p>
+            <label id="{{form.body.id_for_label}}">{{form.body.label}}</label><br>
+            {{form.body.errors}}{{form.body}}
+        </p>
+        <p>
+            <label id="{{form.email.id_for_label}}">{{form.email.label}}</label><br>
+            {{form.email.errors}}{{form.email}}
+        </p>
+        <p>
+            <label id="{{form.tel.id_for_label}}">Mobile Number</label><br>
+            {{form.tel.errors}}{{form.tel}}
+        </p>
+        <!-- {{form.as_p}} -->
+        <input type="submit" value="Save">
+    </form>
+    <script src="{% static 'js/bootstrap.min.js' %}"></script>
+</body>
+</html>
