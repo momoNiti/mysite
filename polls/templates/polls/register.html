@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Register new User</title>
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+    <style>
+        .errorlist{
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <form action="{% url 'register' %}" method="POST">
+        {% csrf_token %}
+        <h1>สมัครสมาชิก</h1>
+        {{form.as_p}}
+        <input type="submit" value="Save">
+    </form>
+    <script src="{% static 'js/bootstrap.min.js' %}"></script>
+</body>
+</html>

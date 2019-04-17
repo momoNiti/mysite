@@ -1,12 +1,6 @@
 from django.db import models
 
 # Create your models here.
-class Comment(models.Model):
-    title = models.CharField(max_length=100)
-    body = models.TextField()
-    email = models.EmailField()
-    tel = models.CharField(max_length=10)
-
 class Poll(models.Model):
     title = models.CharField(max_length=100)
     start_date = models.DateField(null=True, blank=True)
@@ -40,3 +34,26 @@ class Answer(models.Model):
     choice = models.OneToOneField(Choice, on_delete=models.PROTECT)
     question = models.ForeignKey(Question, on_delete=models.PROTECT)
 
+class Comment(models.Model):
+    title = models.CharField(max_length=100)
+    body = models.TextField()
+    email = models.EmailField(blank=True)
+    tel = models.CharField(max_length=10, blank=True)
+    poll = models.ForeignKey(Poll, on_delete=models.CASCADE, null=True, blank=True)
+    def __str__(self):
+        return self.title
+
+class Profile(models.Model):
+    user = models.OneToOneField('auth.User', on_delete=models.CASCADE)
+    line_id = models.CharField(max_length=100)
+    facebook = models.CharField(max_length=100)
+    MALE = 'M'
+    FEMALE = 'F'
+    OTHER = 'X'
+    GENDERS = (
+        (MALE, 'ชาย'),
+        (FEMALE, 'หญิง'),
+        (OTHER, 'อื่นๆ')
+    )
+    gender = models.CharField(max_length=1, choices=GENDERS)
+    birthdate = models.DateField(null=True)

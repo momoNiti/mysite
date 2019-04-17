@@ -3,11 +3,12 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required, permission_required
-# from django.db.models import Count
+from django.contrib.auth.models import User
+from django.db.models import Count
 
 # Create your views here.
-from polls.models import Poll, Question, Answer, Comment
-from polls.forms import PollForm, CommentForm
+from polls.models import Poll, Question, Answer, Comment, Profile
+from polls.forms import PollForm, CommentForm, ChangePasswordForm, RegisterForm
 
 def index(request):
     print(request.user)
@@ -70,7 +71,7 @@ def create(request):
     context = {'form': form}
     return render(request, 'polls/create.html', context=context)
 
-def comment(request):
+def comment(request, poll_id):
     if (request.method == "POST"):
         form = CommentForm(request.POST)
         if form.is_valid():
@@ -78,12 +79,14 @@ def comment(request):
                 title = form.cleaned_data.get('title'),
                 body = form.cleaned_data.get('body'),
                 email = form.cleaned_data.get('email'),
-                tel = form.cleaned_data.get('tel')
+                tel = form.cleaned_data.get('tel'),
+                poll_id = poll_id
             )
             comment.save()
     else:
         form = CommentForm()
     context = {'form': form}
+    context['poll_id'] = poll_id
     return render(request, template_name="polls/comment.html", context=context)
 
 def my_login(request):
@@ -112,3 +115,46 @@ def my_login(request):
 def my_logout(request):
     logout(request)
     return redirect('login')
+
+@login_required
+def change_password(request):
+    context = {}
+    if (request.method == "POST"):
+        form = ChangePasswordForm(request.POST)
+        current_password = request.POST.get('old_password')
+        user = authenticate(request, username=request.user.username, password=current_password)
+        if user and form.is_valid():
+            new_password = form.cleaned_data.get('new_password'),
+            u = User.objects.get(username = request.user)
+            u.set_password(new_password[0])
+            u.save()
+        elif not user:
+            context['myerror'] = "Passwordเก่าไม่ถูกต้อง"
+
+    else:
+        form = ChangePasswordForm()
+    context['form'] = form
+    return render(request, template_name="polls/change_password.html", context=context)
+
+def register(request):
+    if (request.method == "POST"):
+        form = RegisterForm(request.POST)
+        if form.is_valid():
+            u = User.objects.create_user(
+                form.cleaned_data.get('username'),
+                form.cleaned_data.get('email'),
+                form.cleaned_data.get('password')
+            )
+
+            profile = Profile.objects.create(
+                line_id = form.cleaned_data.get('line_id'),
+                facebook = form.cleaned_data.get('facebook'),
+                gender = form.cleaned_data.get('gender'),
+                birthdate = form.cleaned_data.get('birthdate'),
+                user_id = u.id
+            )
+            profile.save()
+    else:
+        form = RegisterForm()
+    context = {'form': form}
+    return render(request, template_name="polls/register.html", context=context)

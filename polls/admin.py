@@ -1,5 +1,5 @@
 from django.contrib import admin
-from polls.models import Poll, Question, Choice
+from polls.models import Poll, Question, Choice, Comment
 from django.contrib.auth.models import Permission
 
 # Register your models here.
@@ -45,3 +45,11 @@ class ChoiceAdmin(admin.ModelAdmin):
     list_filter = ['question']
     search_fields = ['question', 'text']
 admin.site.register(Choice, ChoiceAdmin)
+
+class CommentAdmin(admin.ModelAdmin):
+    list_display = ['id', 'title', 'email', 'tel', 'poll']
+
+    list_filter = ['poll']
+    search_fields = ['title', 'body']
+
+admin.site.register(Comment, CommentAdmin)

@@ -1,10 +1,56 @@
 from django import forms
 from django.core import validators
 from django.core.exceptions import ValidationError
-
+from .models import Profile
 def validate_even(value):
     if value % 2 !=0:
         raise ValidationError('%(value)s ไม่ใช่เลขคู่', params={'value': value})
+
+class RegisterForm(forms.Form):
+    email = forms.EmailField(label="อีเมล์")
+    username = forms.CharField(label="ชื่อผู้ใช้")
+    password = forms.CharField(label="รหัสผ่าน")
+    re_password = forms.CharField(label="ยืนยันรหัสผ่าน")
+    line_id = forms.CharField(max_length=100, label="LINE ID", required=False)
+    facebook = forms.CharField(max_length=100, label="Facebook", required=False)
+    gender = forms.ChoiceField(choices=Profile.GENDERS, label="เพศ", widget=forms.RadioSelect, required=True)
+    birthdate = forms.DateField(label="วันเกิด", required=False)
+
+    def clean_password(self):
+        data = self.cleaned_data['password']
+        if len(data) > 8:
+            pass
+        else:
+            raise forms.ValidationError("รหัสผ่านต้องมีตัวอักษรมากกว่า 8 ตัวอักษร")
+        return data
+    def clean(self):
+        cleaned_data = super().clean()
+        new = cleaned_data.get('password')
+        re = cleaned_data.get('re_password')
+        if new != re:
+            raise forms.ValidationError('"รหัสผ่าน" และ "ยืนยันรหัสผ่าน" ต้องเหมือนกัน')
+
+class ChangePasswordForm(forms.Form):
+    old_password = forms.CharField(label="รหัสผ่านเก่า")
+    new_password = forms.CharField(label="รหัสผ่านใหม่")
+    re_password = forms.CharField(label="ยืนยันรหัสผ่าน")
+    def clean_new_password(self):
+        data = self.cleaned_data['new_password']
+        # print(data)
+        if len(data) > 8:
+            pass
+        else:
+            raise forms.ValidationError("รหัสผ่านใหม่ต้องมีตัวอักษรมากกว่า 8 ตัวอักษร")
+        return data
+
+    def clean(self):
+        cleaned_data = super().clean()
+        new = cleaned_data.get('new_password')
+        re = cleaned_data.get('re_password')
+        if new != re:
+            raise forms.ValidationError('"รหัสผ่านใหม่" กับ "ยืนยันรหัสผ่าน" ต้องเหมือนกัน')
+
+
 class PollForm(forms.Form):
     title = forms.CharField(label="ชื่อโพล", max_length=100, required=True)
     email = forms.CharField()
