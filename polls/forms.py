@@ -1,7 +1,8 @@
 from django import forms
 from django.core import validators
 from django.core.exceptions import ValidationError
-from .models import Profile
+from .models import Profile, Question, Choice
+from polls.models import Poll
 def validate_even(value):
     if value % 2 !=0:
         raise ValidationError('%(value)s ไม่ใช่เลขคู่', params={'value': value})
@@ -76,6 +77,42 @@ class PollForm(forms.Form):
         elif end and not start:
             #raise forms.ValidationError('โปรดเลือดวันที่เริ่มต้น')
             self.add_error('start_date', 'โปรดเลือกวันที่เริ่มต้น')
+
+class QuestionForm(forms.Form):
+    question_id = forms.IntegerField(required=False, widget=forms.HiddenInput)
+    text = forms.CharField(widget=forms.Textarea)
+    type = forms.ChoiceField(choices=Question.TYPES, initial='01')
+
+class ChoiceModelForm(forms.ModelForm):
+    class Meta:
+        model = Choice
+        fields = '__all__'
+
+class PollModelForm(forms.ModelForm):
+    #email = forms.CharField()
+    #no_questions = forms.IntegerField(label="จำนวนคำถาม", min_value=0, max_value=10, validators=[validate_even])
+    class Meta:
+        model = Poll
+        exclude = ['del_flag']
+    def clean_title(self):
+        data = self.cleaned_data['title']
+        if "ไอทีหมีแพนด้า" not in data:
+            raise forms.ValidationError("คุณลืมชื่อคณะ")
+        return data
+
+    def clean(self):
+        """validate แบบ form สังเกตว่ามันจะเป็นค่าของ 2 field"""
+        cleaned_data = super().clean()
+        start = cleaned_data.get('start_date')
+        end = cleaned_data.get('end_date')
+
+        if start and not end:
+            #raise forms.ValidationError('โปรดเลือกวันที่สิ้นสุด')
+            self.add_error('end_date', 'โปรดเลือกวันที่สิ้นสุด') #แสดงในฟิลด์
+        elif end and not start:
+            #raise forms.ValidationError('โปรดเลือดวันที่เริ่มต้น')
+            self.add_error('start_date', 'โปรดเลือกวันที่เริ่มต้น')
+
 
 class CommentForm(forms.Form):
     title = forms.CharField(max_length=100)
